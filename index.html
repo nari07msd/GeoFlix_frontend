@@ -1,44 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GeoFlix - Smart Video Recommender</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="description" content="AI-powered video recommender based on weather and location">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoFlix Smart Video Recommender</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="container">
-    <h1>🎥 GeoFlix <span>Smart Video Recommender</span></h1>
 
-    <form id="cityForm" class="search-box">
-      <input type="text" id="cityInput" placeholder="Enter city...">
-      <button type="submit">Search</button>
-    </form>
+  <header>🎥 GeoFlix Smart Video Recommender</header>
 
-    <div id="info" class="info-card">
-      <p id="location">📍 Detecting your location...</p>
-      <p id="weather">🌦 Loading weather data...</p>
-      <p id="trends">🔥 Analyzing local trends...</p>
-    </div>
+  <form id="cityForm">
+    <input type="text" id="cityInput" placeholder="Enter city..." />
+    <button type="submit">Search</button>
+  </form>
 
-    <div class="toggle-mode">
-      <label>
-        🌙 Dark Mode <input type="checkbox" id="darkModeToggle">
-      </label>
-    </div>
+  <div id="darkToggle">
+    🌙 Dark Mode <input type="checkbox" onchange="toggleDarkMode()" />
+  </div>
 
-    <div class="loader" id="loader" style="display:none;"></div>
+  <div id="location"></div>
+  <div id="weather"></div>
+  <div id="trends"></div>
 
-    <section class="recommendations">
-      <h2>Recommended For You</h2>
-      <div id="videos" class="video-grid"></div>
-    </section>
-  </main>
-
-  <footer>
-    <p>Built with ❤️ by Narendra</p>
-  </footer>
+  <h2 style="text-align:center; margin-top: 2rem;">Recommended For You</h2>
+  <div id="videos"></div>
 
   <script src="script.js"></script>
 </body>
