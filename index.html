@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoFlix - Smart Video Recommender</title>
+  <link rel="stylesheet" href="style.css">
+  <meta name="description" content="AI-powered video recommender based on weather and location">
+</head>
+<body>
+  <main class="container">
+    <h1>🎥 GeoFlix <span>Smart Video Recommender</span></h1>
+
+    <form id="cityForm" class="search-box">
+      <input type="text" id="cityInput" placeholder="Enter city...">
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="info" class="info-card">
+      <p id="location">📍 Detecting your location...</p>
+      <p id="weather">🌦 Loading weather data...</p>
+      <p id="trends">🔥 Analyzing local trends...</p>
+    </div>
+
+    <div class="toggle-mode">
+      <label>
+        🌙 Dark Mode <input type="checkbox" id="darkModeToggle">
+      </label>
+    </div>
+
+    <div class="loader" id="loader" style="display:none;"></div>
+
+    <section class="recommendations">
+      <h2>Recommended For You</h2>
+      <div id="videos" class="video-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Built with ❤️ by Narendra</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
