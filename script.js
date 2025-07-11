@@ -59,10 +59,10 @@ async function updateDashboard(city) {
     elements.location.textContent = `📍 ${city}`;
 
     const weather = await fetchWeather(city);
-    const trend = await getLocalTrend(city);
+    const trendCategory = await getLocalTrend(city, weather);
 
-    elements.trends.textContent = `🔥 Local Trend: ${trend}`;
-    showRecommendations(weather, trend, city);
+    elements.trends.textContent = `🔥 ${trendCategory}`;
+    showRecommendations(weather, trendCategory, city);
   } catch (error) {
     console.error("Dashboard error:", error);
     showMockVideos();
@@ -179,14 +179,30 @@ async function reverseGeocode(lat, lon) {
 }
 
 // ===== Backend Call =====
-async function getLocalTrend(city) {
+async function getLocalTrend(city, weather) {
   try {
-    const res = await fetch(`${BACKEND_URL}/trends?city=${encodeURIComponent(city)}`);
-    const data = await res.json();
-    return data.trend || "local culture";
+    // 1. Get trend
+    const trendRes = await fetch(`${BACKEND_URL}/trends?city=${encodeURIComponent(city)}`);
+    const trendData = await trendRes.json();
+    const trend = trendData.trend || "local culture";
+
+    // 2. Get ML prediction
+    const mlRes = await fetch(`${BACKEND_URL}/ml-recommend`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        condition: weather.condition,
+        temperature: weather.temp
+      })
+    });
+
+    const mlData = await mlRes.json();
+    const category = mlData.category || "relax";
+
+    return `${trend} & ${category}`;
   } catch (err) {
-    console.error("Backend trend fetch failed:", err);
-    return "local culture";
+    console.error("Trend or ML backend failed:", err);
+    return "local culture & relax";
   }
 }
 
