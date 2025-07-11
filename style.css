@@ -1,24 +1,26 @@
-/* === Global Styles === */
+/* === Base Styles === */
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f5f7fa;
-  color: #222;
-  transition: background 0.3s, color 0.3s;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+  color: #333;
+  transition: all 0.3s ease;
 }
 
+/* === Dark Mode === */
 .dark-mode {
-  background-color: #121212;
-  color: #f5f5f5;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #f1f1f1;
 }
 
 /* === Header === */
 header {
   text-align: center;
-  padding: 2rem 1rem 1rem;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #0077ff;
+  font-size: 2.5rem;
+  padding: 1.5rem;
+  font-weight: 800;
+  color: #ff4081;
+  text-shadow: 1px 1px 2px #aaa;
 }
 
 /* === Form === */
@@ -26,58 +28,63 @@ header {
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin: 1rem auto;
 }
 
 #cityInput {
-  padding: 0.75rem;
-  width: 240px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  width: 250px;
+  border: 2px solid #ff4081;
+  border-radius: 10px;
+  font-size: 1rem;
+  background-color: #fff;
 }
 
 button[type="submit"] {
-  background-color: #0077ff;
+  background: linear-gradient(135deg, #ff4081, #ff80ab);
   color: white;
-  border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
+  padding: 0.7rem 1.2rem;
   font-weight: 600;
-  transition: background 0.3s;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 button[type="submit"]:hover {
-  background-color: #0055cc;
+  transform: scale(1.05);
+  background: linear-gradient(135deg, #f50057, #ff4081);
 }
 
-/* === Dashboard Info === */
+/* === Dashboard Texts === */
 #location, #weather, #trends {
   text-align: center;
   margin: 0.5rem 0;
   font-size: 1.2rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* === Recommendations Grid === */
+/* === Video Cards Grid === */
 #videos {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+  gap: 1.5rem;
   padding: 2rem;
 }
 
-/* === Card Style === */
+/* === Recommendation Card === */
 .recommendation-card {
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  transition: transform 0.3s;
+  transition: all 0.3s ease;
+  border: 2px solid #ff80ab;
 }
 
 .recommendation-card:hover {
-  transform: scale(1.02);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
 }
 
 .recommendation-card img {
@@ -87,35 +94,38 @@ button[type="submit"]:hover {
 }
 
 .recommendation-card h3 {
-  font-size: 1.1rem;
-  margin: 0.75rem;
+  margin: 1rem;
+  font-size: 1.2rem;
+  color: #d81b60;
 }
 
 .recommendation-card p {
-  margin: 0 0.75rem 0.75rem;
-  color: #666;
+  margin: 0 1rem 1rem;
+  color: #555;
 }
 
+/* === Search Button === */
 .search-button {
   display: block;
-  margin: 0 0.75rem 1rem;
+  margin: 0 1rem 1rem;
   text-align: center;
-  background-color: #0077ff;
+  background: linear-gradient(135deg, #7b1fa2, #e91e63);
   color: white;
-  padding: 0.5rem;
-  border-radius: 8px;
+  padding: 0.6rem;
+  border-radius: 12px;
   text-decoration: none;
-  transition: background 0.3s;
+  font-weight: bold;
+  transition: transform 0.3s ease;
 }
 
 .search-button:hover {
-  background-color: #0055cc;
+  transform: scale(1.05);
 }
 
 /* === Loader === */
 .loader {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #0077ff;
+  border: 6px solid #fce4ec;
+  border-top: 6px solid #ff4081;
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -126,4 +136,23 @@ button[type="submit"]:hover {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* === Dark Mode Toggle Button === */
+#darkToggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.6rem 1rem;
+  background: linear-gradient(135deg, #212121, #424242);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+#darkToggle:hover {
+  background: linear-gradient(135deg, #424242, #212121);
 }
