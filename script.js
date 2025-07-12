@@ -1,9 +1,36 @@
+// ===== Dark Mode =====
+function toggleDarkMode() {
+  const body = document.body;
+  body.classList.toggle('dark-mode');
+  
+  // Save preference to localStorage
+  const isDarkMode = body.classList.contains('dark-mode');
+  localStorage.setItem('geoFlixDarkMode', isDarkMode);
+  
+  // Update toggle state
+  const darkToggle = document.querySelector('#darkToggle input');
+  if (darkToggle) {
+    darkToggle.checked = isDarkMode;
+  }
+}
+
+function initializeDarkMode() {
+  const savedMode = localStorage.getItem('geoFlixDarkMode') === 'true';
+  if (savedMode) {
+    document.body.classList.add('dark-mode');
+    const darkToggle = document.querySelector('#darkToggle input');
+    if (darkToggle) {
+      darkToggle.checked = true;
+    }
+  }
+}
+
 // ===== Backend URL =====
 const BACKEND_URL = "https://geoflixbackend-production.up.railway.app";
 
 // ===== Configuration =====
 const CONFIG = {
-  WEATHER_API_KEY: "82ef7eb8c710a4d63f28712218fd2b3e", // Replace with your key
+  WEATHER_API_KEY: "82ef7eb8c710a4d63f28712218fd2b3e",
   FALLBACK_CITY: "New York",
   MOCK_VIDEOS: [
     {
@@ -30,7 +57,10 @@ const elements = {
 };
 
 // ===== Initialize App =====
-document.addEventListener("DOMContentLoaded", initApp);
+document.addEventListener("DOMContentLoaded", function() {
+  initializeDarkMode();
+  initApp();
+});
 
 async function initApp() {
   elements.form.addEventListener("submit", handleFormSubmit);
@@ -145,10 +175,11 @@ function generateSuggestions(weather, trend, city) {
 
 function showMockVideos() {
   elements.videos.innerHTML = CONFIG.MOCK_VIDEOS.map(video => `
-    <div class="video-card">
+    <div class="recommendation-card">
       <img src="${video.thumbnail}" alt="${video.title}">
       <h3>${video.title}</h3>
       <p>${video.description}</p>
+      <button class="search-button">Search Videos</button>
     </div>
   `).join("");
 }
@@ -209,3 +240,6 @@ async function getLocalTrend(city, weather) {
 function showLoadingState() {
   elements.videos.innerHTML = '<div class="loader"></div>';
 }
+
+// Expose toggle function to window for HTML onclick
+window.toggleDarkMode = toggleDarkMode;
