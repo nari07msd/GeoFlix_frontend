@@ -2,11 +2,11 @@
 function toggleDarkMode() {
   const body = document.body;
   body.classList.toggle('dark-mode');
-  
+
   // Save preference to localStorage
   const isDarkMode = body.classList.contains('dark-mode');
   localStorage.setItem('geoFlixDarkMode', isDarkMode);
-  
+
   // Update toggle state
   const darkToggle = document.querySelector('#darkToggle input');
   if (darkToggle) {
@@ -206,18 +206,23 @@ async function detectLocation() {
 async function reverseGeocode(lat, lon) {
   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
   const data = await response.json();
-  return data.address.city || data.address.town || CONFIG.FALLBACK_CITY;
+  return (
+    data.address.village ||
+    data.address.town ||
+    data.address.hamlet ||
+    data.address.suburb ||
+    data.address.city ||
+    CONFIG.FALLBACK_CITY
+  );
 }
 
 // ===== Backend Call =====
 async function getLocalTrend(city, weather) {
   try {
-    // 1. Get trend
     const trendRes = await fetch(`${BACKEND_URL}/trends?city=${encodeURIComponent(city)}`);
     const trendData = await trendRes.json();
     const trend = trendData.trend || "local culture";
 
-    // 2. Get ML prediction
     const mlRes = await fetch(`${BACKEND_URL}/ml-recommend`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -241,5 +246,4 @@ function showLoadingState() {
   elements.videos.innerHTML = '<div class="loader"></div>';
 }
 
-// Expose toggle function to window for HTML onclick
 window.toggleDarkMode = toggleDarkMode;
