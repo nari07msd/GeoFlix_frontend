@@ -8,9 +8,9 @@ function toggleDarkMode() {
   localStorage.setItem('geoFlixDarkMode', isDarkMode);
 
   // Update toggle state
-  const darkToggle = document.querySelector('#darkToggle input');
-  if (darkToggle) {
-    darkToggle.checked = isDarkMode;
+  const darkToggle = document.querySelector('#darkToggle');
+  if (darkToggle && darkToggle.querySelector('input')) {
+    darkToggle.querySelector('input').checked = isDarkMode;
   }
 }
 
@@ -18,9 +18,9 @@ function initializeDarkMode() {
   const savedMode = localStorage.getItem('geoFlixDarkMode') === 'true';
   if (savedMode) {
     document.body.classList.add('dark-mode');
-    const darkToggle = document.querySelector('#darkToggle input');
-    if (darkToggle) {
-      darkToggle.checked = true;
+    const darkToggle = document.querySelector('#darkToggle');
+    if (darkToggle && darkToggle.querySelector('input')) {
+      darkToggle.querySelector('input').checked = true;
     }
   }
 }
@@ -120,7 +120,7 @@ async function fetchWeather(city) {
 }
 
 function updateBackground(weatherCondition) {
-  document.body.className = "";
+  document.body.className = document.body.classList.contains('dark-mode') ? 'dark-mode' : '';
   if (weatherCondition.includes("Rain")) document.body.classList.add("rainy");
   else if (weatherCondition.includes("Snow")) document.body.classList.add("snowy");
   else if (weatherCondition.includes("Clear")) document.body.classList.add("sunny");
