@@ -36,12 +36,14 @@ const CONFIG = {
     {
       title: "City Exploration Ideas",
       description: "Best activities for current weather",
-      thumbnail: "https://picsum.photos/300/200?city"
+      thumbnail: "https://picsum.photos/300/200?city",
+      searchQuery: "City Exploration Ideas New York"
     },
     {
       title: "Local Culture Guide",
       description: "Discover hidden gems in your area",
-      thumbnail: "https://picsum.photos/300/200?culture"
+      thumbnail: "https://picsum.photos/300/200?culture",
+      searchQuery: "Local Culture Guide New York"
     }
   ]
 };
@@ -179,7 +181,9 @@ function showMockVideos() {
       <img src="${video.thumbnail}" alt="${video.title}">
       <h3>${video.title}</h3>
       <p>${video.description}</p>
-      <button class="search-button">Search Videos</button>
+      <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(video.searchQuery)}" target="_blank" class="search-button">
+        Search Videos
+      </a>
     </div>
   `).join("");
 }
