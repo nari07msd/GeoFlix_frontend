@@ -1,104 +1,85 @@
-const BACKEND_URL = "https://geoflixbackend-production.up.railway.app";
-const WEATHER_API_KEY = "82ef7eb8c710a4d63f28712218fd2b3e";
+const weatherApiKey = "82ef7eb8c710a4d63f28712218fd2b3e";
+const backendUrl = "https://geoflixbackend-production.up.railway.app";
 
-// Helpers for UI
+// DOM Elements
+const recommendationDiv = document.getElementById("recommendation");
+const loadingDiv = document.getElementById("loading");
+
 function showLoading() {
-    const loading = document.getElementById("loading");
-    if (loading) loading.style.display = "block";
+  if (loadingDiv) loadingDiv.style.display = "block";
+  if (recommendationDiv) recommendationDiv.style.display = "none";
 }
 
 function hideLoading() {
-    const loading = document.getElementById("loading");
-    if (loading) loading.style.display = "none";
+  if (loadingDiv) loadingDiv.style.display = "none";
+  if (recommendationDiv) recommendationDiv.style.display = "block";
 }
 
-function showError(message) {
-    const error = document.getElementById("error");
-    if (error) {
-        error.innerText = message;
-        error.style.display = "block";
-    }
+function displayRecommendation(category) {
+  recommendationDiv.innerHTML = `<h3>Recommended Category: ${category}</h3>`;
+  hideLoading();
 }
 
-// === GeoFlix Recommendation Logic ===
-async function loadGeoFlix() {
-    showLoading();
+function initApp() {
+  showLoading();
 
-    try {
-        // Get location
-        const locRes = await fetch("https://ipapi.co/json/");
-        const locData = await locRes.json();
-        const city = locData.city;
+  if (!navigator.geolocation) {
+    alert("Geolocation is not supported.");
+    return;
+  }
 
-        // Get weather
-        const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${WEATHER_API_KEY}&units=metric`);
-        const weatherData = await weatherRes.json();
-        const condition = weatherData.weather[0].main;
-        const temperature = weatherData.main.temp;
-
-        // Get ML Recommendation
-        const mlRes = await fetch(`${BACKEND_URL}/ml-recommend`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ condition, temperature })
-        });
-        const mlData = await mlRes.json();
-
-        // Get Trends
-        const trendRes = await fetch(`${BACKEND_URL}/trends?city=${city}`);
-        const trendData = await trendRes.json();
-
-        // Update UI
-        document.getElementById("location").innerText = city;
-        document.getElementById("condition").innerText = condition;
-        document.getElementById("temperature").innerText = `${temperature}°C`;
-        document.getElementById("category").innerText = mlData.category;
-        document.getElementById("trend").innerText = trendData.trend;
-
-    } catch (err) {
-        console.error(err);
-        showError("Something went wrong.");
-    }
-
-    hideLoading();
+  navigator.geolocation.getCurrentPosition(success, error);
 }
 
-// === Dashboard Analytics Logic ===
-async function loadDashboard() {
-    showLoading();
-
-    try {
-        const res = await fetch(`${BACKEND_URL}/dashboard`);
-        const data = await res.json();
-
-        if (data.message) {
-            document.getElementById("analytics").innerText = data.message;
-        } else {
-            document.getElementById("total").innerText = data.total_predictions;
-            document.getElementById("common").innerText = data.most_common_category;
-            document.getElementById("average").innerText = `${data.average_temperature}°C`;
-
-            const condList = document.getElementById("conditions");
-            condList.innerHTML = "";
-            for (let cond in data.condition_distribution) {
-                const li = document.createElement("li");
-                li.innerText = `${cond}: ${data.condition_distribution[cond]}`;
-                condList.appendChild(li);
-            }
-        }
-    } catch (err) {
-        console.error(err);
-        showError("Failed to load dashboard.");
-    }
-
-    hideLoading();
+function success(position) {
+  const lat = position.coords.latitude;
+  const lon = position.coords.longitude;
+  fetchWeather(lat, lon);
 }
 
-// === Page Initialization ===
-document.addEventListener("DOMContentLoaded", () => {
-    if (document.getElementById("category")) {
-        loadGeoFlix();
-    } else if (document.getElementById("analytics")) {
-        loadDashboard();
-    }
-});
+function error(err) {
+  alert("Location access is required.");
+  console.error("Geolocation error:", err);
+}
+
+function fetchWeather(lat, lon) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log("✅ Weather data:", data);
+      const condition = data.weather[0].main;
+      const temp = data.main.temp;
+      getRecommendation(condition, temp);
+    })
+    .catch(err => {
+      alert("Failed to get weather data.");
+      console.error("Weather error:", err);
+    });
+}
+
+function getRecommendation(condition, temperature) {
+  fetch(`${backendUrl}/recommend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ condition, temperature }),
+  })
+    .then(res => res.json())
+    .then(data => {
+      console.log("✅ Recommendation response:", data);
+      if (data.recommendation) {
+        displayRecommendation(data.recommendation);
+      } else {
+        recommendationDiv.innerHTML = "<p>No recommendation available.</p>";
+        hideLoading();
+      }
+    })
+    .catch(err => {
+      alert("Failed to get recommendation.");
+      console.error("Recommendation fetch error:", err);
+    });
+}
+
+// Start app
+document.addEventListener("DOMContentLoaded", initApp);
