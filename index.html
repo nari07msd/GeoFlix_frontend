@@ -2,47 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GeoFlix - Smart Video Recommender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GeoFlix Recommender</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="header">
-    <div class="logo">
-      <img src="https://cdn-icons-png.flaticon.com/512/44/44386.png" alt="GeoFlix Logo">
-      <h1>GeoFlix</h1>
-    </div>
-    <div class="controls">
-      <label id="darkToggle">
-        <input type="checkbox" onchange="toggleDarkMode()" />
-        <span>🌙 Dark Mode</span>
-      </label>
-      <form id="cityForm">
-        <input type="text" id="cityInput" placeholder="Enter city name..." required />
-        <button type="submit">Search</button>
-      </form>
-    </div>
+  <header>
+    <h1>GeoFlix Video Recommender</h1>
   </header>
 
-  <section class="info">
-    <p id="location">📍 Loading location...</p>
-    <p id="weather">🌦 Loading weather...</p>
-    <p id="trends">🔥 Loading trends...</p>
-  </section>
-
   <main>
-    <h2>🎬 Recommended Videos</h2>
-    <div id="videos" class="video-grid">
-      <!-- Video cards go here -->
-    </div>
+    <div id="location">Detecting your location...</div>
+    <div id="weather">Fetching weather...</div>
+    <div id="recommendation">Loading recommendation...</div>
   </main>
 
-  <div class="dashboard-link">
-  <a href="dashboard.html" class="dashboard-button">📊 View Dashboard</a>
-</div>
-
   <footer>
-    <p>&copy; 2025 GeoFlix. Smart video recommendations powered by location, weather & ML.</p>
+    <a href="dashboard.html">Go to Dashboard →</a>
   </footer>
 
   <script src="script.js"></script>
