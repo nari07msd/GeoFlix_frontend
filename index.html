@@ -3,22 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GeoFlix Recommender</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>GeoFlix - Smart Video Recommender</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <header>
-    <h1>GeoFlix Video Recommender</h1>
+    <h1>🎥 GeoFlix</h1>
+    <p>Smart Video Recommendations Based on Your Weather & Location</p>
   </header>
 
   <main>
-    <div id="location">Detecting your location...</div>
-    <div id="weather">Fetching weather...</div>
-    <div id="recommendation">Loading recommendation...</div>
+    <div id="loader">Loading...</div>
+    <div id="location"></div>
+    <div id="weather"></div>
+    <div id="trends"></div>
+    <div id="info"></div>
+    <div id="videos" class="video-grid"></div>
   </main>
 
   <footer>
-    <a href="dashboard.html">Go to Dashboard →</a>
+    <a href="dashboard.html">📊 View Analytics Dashboard</a>
   </footer>
 
   <script src="script.js"></script>
