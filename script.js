@@ -1,190 +1,170 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const path = window.location.pathname;
+// ========== CONFIG ==========
+const BACKEND_URL = "https://geoflixbackend-production.up.railway.app";
+const WEATHER_API_KEY = "82ef7eb8c710a4d63f28712218fd2b3e";
 
-  if (path.includes("dashboard.html")) {
-    fetchDashboardData();
+// ========== PAGE INITIALIZATION ==========
+document.addEventListener("DOMContentLoaded", () => {
+  const isDashboard = window.location.pathname.includes("dashboard");
+  if (isDashboard) {
+    fetchDashboardAnalytics();
   } else {
-    initGeoFlix();
+    initApp(); // index.html
   }
 });
 
-/* ===== GEOFLIX RECOMMENDER LOGIC FOR index.html ===== */
+// ========== INDEX PAGE (index.html) ==========
+async function initApp() {
+  showLoading();
+  try {
+    const location = await fetchLocation();
+    const weather = await fetchWeather(location.lat, location.lon);
+    const trend = await fetchTrend(location.city);
+    const category = await fetchRecommendation(weather);
 
-function initGeoFlix() {
-  showLoading(true);
-  getUserLocation()
-    .then((location) => {
-      updateLocationUI(location);
-      return Promise.all([location, getWeather(location)]);
-    })
-    .then(([location, weather]) => {
-      updateWeatherUI(weather);
-      return Promise.all([weather, getTrends(location.city)]);
-    })
-    .then(([weather, trends]) => {
-      updateTrendsUI(trends);
-      return getRecommendations(weather);
-    })
-    .then((videos) => {
-      updateRecommendationsUI(videos);
-      showLoading(false);
-    })
-    .catch((error) => {
-      console.error("Initialization Error:", error);
-      showLoading(false);
-      alert("Failed to load data. Please try again.");
-    });
+    displayInfo(location, weather, trend, category);
+    displayVideos(category);
+  } catch (error) {
+    console.error("App initialization failed:", error);
+    document.getElementById("info").innerText = "Something went wrong.";
+  }
+  hideLoading();
 }
 
-function getUserLocation() {
-  return fetch("https://ipapi.co/json/")
-    .then((res) => res.json())
-    .then((data) => ({
-      city: data.city,
-      region: data.region,
-      country: data.country_name,
-    }));
+function showLoading() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "block";
+}
+function hideLoading() {
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "none";
 }
 
-function updateLocationUI(location) {
-  document.getElementById("location").textContent =
-    `${location.city}, ${location.region}, ${location.country}`;
-}
-
-function getWeather(location) {
-  const apiKey = "4a6c647a6a05f19478e81fcf3f83d264"; // OpenWeatherMap
-  const url = `https://api.openweathermap.org/data/2.5/weather?q=${location.city}&appid=${apiKey}&units=metric`;
-
-  return fetch(url)
-    .then((res) => res.json())
-    .then((data) => ({
-      description: data.weather[0].main,
-      temperature: data.main.temp,
-    }));
-}
-
-function updateWeatherUI(weather) {
-  document.getElementById("weather").textContent =
-    `${weather.description}, ${weather.temperature.toFixed(1)}°C`;
-  document.body.className = getWeatherClass(weather.description);
-}
-
-function getWeatherClass(desc) {
-  const type = desc.toLowerCase();
-  if (type.includes("sun")) return "sunny";
-  if (type.includes("cloud")) return "cloudy";
-  if (type.includes("rain")) return "rainy";
-  if (type.includes("snow")) return "snowy";
-  return "";
-}
-
-function getTrends(city) {
-  return fetch(`https://api.popcat.xyz/trending?country=india`)
-    .then((res) => res.json())
-    .then((data) => data.trending.slice(0, 5)); // top 5 trends
-}
-
-function updateTrendsUI(trends) {
-  document.getElementById("trends").textContent = trends.join(", ");
-}
-
-function getRecommendations(weather) {
-  return fetch("http://localhost:8080/ml-recommend", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(weather),
-  })
-    .then((res) => res.json())
-    .then((data) => fetchYouTubeVideos(data.category));
-}
-
-function fetchYouTubeVideos(category) {
-  const videos = {
-    travel: [
-      {
-        title: "Top 10 Travel Destinations",
-        thumbnail: "https://img.youtube.com/vi/1h5iv6sECGU/0.jpg",
-        link: "https://www.youtube.com/watch?v=1h5iv6sECGU",
-      },
-    ],
-    music: [
-      {
-        title: "Relaxing Chill Music",
-        thumbnail: "https://img.youtube.com/vi/5qap5aO4i9A/0.jpg",
-        link: "https://www.youtube.com/watch?v=5qap5aO4i9A",
-      },
-    ],
-    food: [
-      {
-        title: "Street Food Around the World",
-        thumbnail: "https://img.youtube.com/vi/9fGkysB1zZw/0.jpg",
-        link: "https://www.youtube.com/watch?v=9fGkysB1zZw",
-      },
-    ],
-    news: [
-      {
-        title: "World News Live",
-        thumbnail: "https://img.youtube.com/vi/21X5lGlDOfg/0.jpg",
-        link: "https://www.youtube.com/watch?v=21X5lGlDOfg",
-      },
-    ],
-    default: [
-      {
-        title: "Top Picks for You",
-        thumbnail: "https://img.youtube.com/vi/oUFJJNQGwhk/0.jpg",
-        link: "https://www.youtube.com/watch?v=oUFJJNQGwhk",
-      },
-    ],
+// ========== LOCATION ==========
+async function fetchLocation() {
+  const res = await fetch("https://ipapi.co/json");
+  const data = await res.json();
+  return {
+    city: data.city,
+    region: data.region,
+    country: data.country_name,
+    lat: data.latitude,
+    lon: data.longitude,
   };
-
-  return videos[category] || videos["default"];
 }
 
-function updateRecommendationsUI(videos) {
+// ========== WEATHER ==========
+async function fetchWeather(lat, lon) {
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return {
+    condition: data.weather[0].main,
+    temperature: data.main.temp,
+  };
+}
+
+// ========== TRENDS ==========
+async function fetchTrend(city) {
+  const res = await fetch(`${BACKEND_URL}/trends?city=${city}`);
+  const data = await res.json();
+  return data.trend;
+}
+
+// ========== RECOMMENDATION ==========
+async function fetchRecommendation(weather) {
+  const res = await fetch(`${BACKEND_URL}/ml-recommend`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(weather),
+  });
+  const data = await res.json();
+  return data.category;
+}
+
+// ========== DISPLAY ==========
+function displayInfo(location, weather, trend, category) {
+  document.getElementById("location").innerText = `📍 ${location.city}, ${location.country}`;
+  document.getElementById("weather").innerText = `☀️ Weather: ${weather.condition}, ${weather.temperature}°C`;
+  document.getElementById("trends").innerText = `🔥 Trending: ${trend}`;
+  document.getElementById("info").innerText = `🎬 Recommended Category: ${category}`;
+}
+
+function displayVideos(category) {
   const container = document.getElementById("videos");
+  if (!container) return;
+
   container.innerHTML = "";
-  videos.forEach((video) => {
+  const dummyVideos = [
+    { title: `${category} Show 1`, img: "https://source.unsplash.com/featured/?movie" },
+    { title: `${category} Experience`, img: "https://source.unsplash.com/featured/?cinema" },
+    { title: `Top ${category} Picks`, img: "https://source.unsplash.com/featured/?entertainment" },
+  ];
+
+  dummyVideos.forEach((video) => {
     const card = document.createElement("div");
     card.className = "recommendation-card";
     card.innerHTML = `
-      <img src="${video.thumbnail}" alt="${video.title}">
+      <img src="${video.img}" alt="${video.title}">
       <h3>${video.title}</h3>
-      <a class="search-button" href="${video.link}" target="_blank">Watch</a>
+      <a class="search-button" href="https://www.youtube.com/results?search_query=${category}" target="_blank">
+        Watch on YouTube
+      </a>
     `;
     container.appendChild(card);
   });
 }
 
-function showLoading(show) {
-  const loader = document.querySelector(".loader");
-  if (loader) loader.style.display = show ? "block" : "none";
+// ========== DASHBOARD PAGE (dashboard.html) ==========
+async function fetchDashboardAnalytics() {
+  const summaryDiv = document.getElementById("dashboard-summary");
+  const chartDiv = document.getElementById("chart");
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/dashboard`);
+    const data = await res.json();
+
+    if (data.message) {
+      summaryDiv.innerHTML = `<p>${data.message}</p>`;
+      return;
+    }
+
+    summaryDiv.innerHTML = `
+      <p><strong>Total Predictions:</strong> ${data.total_predictions}</p>
+      <p><strong>Most Common Category:</strong> ${data.most_common_category}</p>
+      <p><strong>Average Temperature:</strong> ${data.average_temperature}°C</p>
+    `;
+
+    renderChart(data.condition_distribution);
+  } catch (error) {
+    console.error("Failed to fetch dashboard data:", error);
+    summaryDiv.innerHTML = `<p style="color:red;">Error loading dashboard data</p>`;
+  }
 }
 
-/* ===== DASHBOARD ANALYTICS LOGIC FOR dashboard.html ===== */
-
-function fetchDashboardData() {
-  fetch("http://localhost:8080/dashboard")
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not OK");
+function renderChart(data) {
+  const ctx = document.getElementById("chart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: Object.keys(data),
+      datasets: [{
+        label: "Weather Conditions",
+        data: Object.values(data),
+        backgroundColor: ["#ffa751", "#4b79a1", "#bdc3c7", "#e6dada"],
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        title: {
+          display: true,
+          text: "Weather Condition Distribution",
+          font: { size: 18 }
+        }
       }
-      return response.json();
-    })
-    .then((data) => {
-      document.getElementById("total-requests").textContent =
-        data.total_requests ?? "N/A";
-      document.getElementById("common-weather").textContent =
-        data.common_weather ?? "N/A";
-      document.getElementById("ml-category").textContent =
-        data.ml_category ?? "N/A";
-      document.getElementById("top-city").textContent =
-        data.top_city ?? "N/A";
-    })
-    .catch((error) => {
-      console.error("Error fetching dashboard data:", error);
-      document.getElementById("total-requests").textContent = "Error";
-      document.getElementById("common-weather").textContent = "Error";
-      document.getElementById("ml-category").textContent = "Error";
-      document.getElementById("top-city").textContent = "Error";
-    });
+    }
+  });
 }
