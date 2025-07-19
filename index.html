@@ -9,17 +9,20 @@
 <body>
   <div class="container">
     <h1>🎥 GeoFlix</h1>
-    <p>Smart Video Recommendations Based on Your Weather & Location</p>
+    <h2>Smart Video Recommendations Based on Your Weather & Location</h2>
 
-    <div id="loading" style="display:none;">⏳ Loading...</div>
+    <div id="loading">Fetching your recommendation...</div>
+    <div id="error" style="display:none;">❌ Something went wrong. Please try again.</div>
+
     <div id="result" style="display:none;">
-      <h2>Recommended Category: <span id="category"></span></h2>
-      <h3>Local Trend: <span id="trend"></span></h3>
+      <h3>📍 You are in <span id="city"></span></h3>
+      <p>🌤️ Weather: <span id="condition"></span></p>
+      <p>🌡️ Temperature: <span id="temperature"></span>°C</p>
+      <p>🔥 Local Trend: <span id="trend"></span></p>
+      <h3>🎬 Recommended Video Category: <span id="category"></span></h3>
     </div>
 
-    <div id="error" style="display:none; color: red;">Something went wrong.</div>
-
-    <a href="dashboard.html">📊 View Analytics Dashboard</a>
+    <a href="dashboard.html" class="dashboard-button">📊 View Analytics Dashboard</a>
   </div>
 
   <script src="script.js"></script>
