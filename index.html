@@ -3,28 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GeoFlix - Smart Video Recommender</title>
-  <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>GeoFlix - Smart Video Recommendations</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header>
+  <div class="container">
     <h1>🎥 GeoFlix</h1>
     <p>Smart Video Recommendations Based on Your Weather & Location</p>
-  </header>
 
-  <main>
-    <div id="loader">Loading...</div>
-    <div id="location"></div>
-    <div id="weather"></div>
-    <div id="trends"></div>
-    <div id="info"></div>
-    <div id="videos" class="video-grid"></div>
-  </main>
+    <div id="loading" style="display:none;">⏳ Loading...</div>
+    <div id="result" style="display:none;">
+      <h2>Recommended Category: <span id="category"></span></h2>
+      <h3>Local Trend: <span id="trend"></span></h3>
+    </div>
 
-  <footer>
+    <div id="error" style="display:none; color: red;">Something went wrong.</div>
+
     <a href="dashboard.html">📊 View Analytics Dashboard</a>
-  </footer>
+  </div>
 
   <script src="script.js"></script>
 </body>
