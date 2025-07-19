@@ -1,85 +1,101 @@
-const weatherApiKey = "82ef7eb8c710a4d63f28712218fd2b3e";
-const backendUrl = "https://geoflixbackend-production.up.railway.app";
+const backendUrl = "https://geoflixbackend-production.up.railway.app"; // replace if changed
 
-// DOM Elements
-const recommendationDiv = document.getElementById("recommendation");
-const loadingDiv = document.getElementById("loading");
+document.addEventListener("DOMContentLoaded", () => {
+  const isDashboard = window.location.pathname.includes("dashboard");
 
-function showLoading() {
-  if (loadingDiv) loadingDiv.style.display = "block";
-  if (recommendationDiv) recommendationDiv.style.display = "none";
-}
-
-function hideLoading() {
-  if (loadingDiv) loadingDiv.style.display = "none";
-  if (recommendationDiv) recommendationDiv.style.display = "block";
-}
-
-function displayRecommendation(category) {
-  recommendationDiv.innerHTML = `<h3>Recommended Category: ${category}</h3>`;
-  hideLoading();
-}
+  if (isDashboard) {
+    loadDashboard();
+  } else {
+    initApp();
+  }
+});
 
 function initApp() {
-  showLoading();
+  const loading = document.getElementById("loading");
+  const result = document.getElementById("result");
+  const error = document.getElementById("error");
+
+  loading.style.display = "block";
 
   if (!navigator.geolocation) {
-    alert("Geolocation is not supported.");
+    showError("Geolocation not supported");
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(success, error);
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    try {
+      const cityRes = await fetch(`https://ipapi.co/json/`);
+      const cityData = await cityRes.json();
+      const city = cityData.city || "Global";
+
+      const weatherRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=82ef7eb8c710a4d63f28712218fd2b3e&units=metric`
+      );
+      const weatherData = await weatherRes.json();
+
+      const condition = weatherData.weather[0].main;
+      const temperature = weatherData.main.temp;
+
+      const mlRes = await fetch(`${backendUrl}/ml-recommend`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ condition, temperature }),
+      });
+
+      const mlData = await mlRes.json();
+
+      const trendRes = await fetch(`${backendUrl}/trends?city=${city}`);
+      const trendData = await trendRes.json();
+
+      document.getElementById("category").textContent = mlData.category;
+      document.getElementById("trend").textContent = trendData.trend;
+
+      loading.style.display = "none";
+      result.style.display = "block";
+    } catch (err) {
+      console.error(err);
+      showError("Failed to fetch data.");
+    }
+  }, () => showError("Location access denied."));
 }
 
-function success(position) {
-  const lat = position.coords.latitude;
-  const lon = position.coords.longitude;
-  fetchWeather(lat, lon);
-}
+function loadDashboard() {
+  const dashError = document.getElementById("dash_error");
 
-function error(err) {
-  alert("Location access is required.");
-  console.error("Geolocation error:", err);
-}
-
-function fetchWeather(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${weatherApiKey}&units=metric`;
-
-  fetch(url)
+  fetch(`${backendUrl}/dashboard`)
     .then(res => res.json())
     .then(data => {
-      console.log("✅ Weather data:", data);
-      const condition = data.weather[0].main;
-      const temp = data.main.temp;
-      getRecommendation(condition, temp);
-    })
-    .catch(err => {
-      alert("Failed to get weather data.");
-      console.error("Weather error:", err);
-    });
-}
+      if (data.message) {
+        dashError.style.display = "block";
+        return;
+      }
 
-function getRecommendation(condition, temperature) {
-  fetch(`${backendUrl}/recommend`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ condition, temperature }),
-  })
-    .then(res => res.json())
-    .then(data => {
-      console.log("✅ Recommendation response:", data);
-      if (data.recommendation) {
-        displayRecommendation(data.recommendation);
-      } else {
-        recommendationDiv.innerHTML = "<p>No recommendation available.</p>";
-        hideLoading();
+      document.getElementById("total_predictions").textContent = data.total_predictions;
+      document.getElementById("most_common_category").textContent = data.most_common_category;
+      document.getElementById("average_temperature").textContent = data.average_temperature;
+
+      const ul = document.getElementById("condition_distribution");
+      ul.innerHTML = "";
+      for (const [condition, count] of Object.entries(data.condition_distribution)) {
+        const li = document.createElement("li");
+        li.textContent = `${condition}: ${count}`;
+        ul.appendChild(li);
       }
     })
     .catch(err => {
-      alert("Failed to get recommendation.");
-      console.error("Recommendation fetch error:", err);
+      console.error(err);
+      dashError.style.display = "block";
     });
 }
 
-// Start app
-document.addEventListener("DOMContentLoaded", initApp);
+function showError(message) {
+  document.getElementById("loading").style.display = "none";
+  const error = document.getElementById("error");
+  if (error) {
+    error.textContent = message;
+    error.style.display = "block";
+  }
+}
