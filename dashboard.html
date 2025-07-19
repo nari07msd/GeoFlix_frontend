@@ -1,27 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GeoFlix Dashboard</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>📊 GeoFlix Dashboard</h1>
-    <div id="dashboard">
-      <p>Total Predictions: <span id="total_predictions"></span></p>
-      <p>Most Common Category: <span id="most_common_category"></span></p>
-      <p>Average Temperature: <span id="average_temperature"></span>°C</p>
-      <h3>Condition Distribution</h3>
-      <ul id="condition_distribution"></ul>
+    <h1>📊 GeoFlix Analytics Dashboard</h1>
+    <div id="loading">Loading analytics...</div>
+    <div id="error" style="display:none;">❌ Failed to load dashboard data.</div>
+
+    <div id="dashboard" style="display:none;">
+      <p><strong>Total Predictions:</strong> <span id="total"></span></p>
+      <p><strong>Most Common Category:</strong> <span id="common"></span></p>
+      <p><strong>Average Temperature:</strong> <span id="average"></span>°C</p>
+      <div>
+        <h3>🌦️ Condition Distribution:</h3>
+        <ul id="conditions"></ul>
+      </div>
     </div>
 
-    <div id="dash_error" style="color: red; display: none;">No data available yet or error loading data.</div>
-
-    <a href="index.html">🏠 Back to Home</a>
+    <a href="index.html" class="dashboard-button">🏠 Back to Home</a>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const backendURL = "https://geoflixbackend-production.up.railway.app";
+
+    async function loadDashboard() {
+      const loading = document.getElementById("loading");
+      const error = document.getElementById("error");
+      const dashboard = document.getElementById("dashboard");
+
+      try {
+        const response = await fetch(`${backendURL}/dashboard`);
+        const data = await response.json();
+
+        if (data.message) throw new Error(data.message);
+
+        document.getElementById("total").textContent = data.total_predictions;
+        document.getElementById("common").textContent = data.most_common_category;
+        document.getElementById("average").textContent = data.average_temperature;
+
+        const list = document.getElementById("conditions");
+        list.innerHTML = "";
+
+        for (const [condition, count] of Object.entries(data.condition_distribution)) {
+          const li = document.createElement("li");
+          li.textContent = `${condition}: ${count}`;
+          list.appendChild(li);
+        }
+
+        loading.style.display = "none";
+        dashboard.style.display = "block";
+      } catch (err) {
+        loading.style.display = "none";
+        error.style.display = "block";
+        console.error("Dashboard error:", err);
+      }
+    }
+
+    loadDashboard();
+  </script>
 </body>
 </html>
